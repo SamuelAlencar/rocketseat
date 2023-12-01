@@ -1,85 +1,119 @@
-
 import { randomUUID } from 'node:crypto'
 import { Database } from './database.js'
 import { buildRoutePath } from './utils/build-route-path.js'
 
 const database = new Database()
 
-// Route parameters, request body, query paramenters
-
 export const routes = [
-    {
-        method: 'GET',
-        path: buildRoutePath('/tasks'),
-        handler: (req, res) => {
-            const { search } = req.query
+  {
+    method: 'POST',
+    path: buildRoutePath('/tasks'),
+    handler: (req, res) => {
+      const { title, description } = req.body
 
-            const tasks = database.select('tasks', search ? {
-                title: search,
-                description: search,
-            } : null)
+      if (!title) {
+        return res.writeHead(400).end(
+          JSON.stringify({ message: 'title is required' }),
+        )
+      }
 
-            return res.end(JSON.stringify(tasks))
-            
-        }
-    },
-    {
-        method: 'POST',
-        path: buildRoutePath('/tasks'),
-        handler: (req, res) => {
+      if (!description) {
+        return res.writeHead(400).end(
+          JSON.stringify({message: 'description is required' })
+        )
+      }
 
-            function createAt() {
-                return new Date()
-            }
+      const task = {
+        id: randomUUID(),
+        title,
+        description,
+        completed_at: null,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }
 
-            const { title, description, completed_at, create_at, update_at} = req.body
+      database.insert('tasks', task)
 
-            const task = {
-                id: randomUUID(),
-                title,
-                description,
-                completed_at: null,
-                create_at: createAt(),
-                update_at: null,
-            }
-    
-            database.insert('tasks', task)
-    
-            return res.writeHead(201).end()          
-        }
-    },
-    {
-        method: 'PUT',
-        path: buildRoutePath('/tasks/:id'),
-        handler: (req, res) => {
+      return res.writeHead(201).end()
+    }
+  },
+  {
+    method: 'GET',
+    path: buildRoutePath('/tasks'),
+    handler: (req, res) => {
+      const { search } = req.query
 
-            const { id } = req.params
+      const tasks = database.select('tasks', {
+        title: search,
+        description: search
+      })
 
-            const { title, description, completed_at, create_at, update_at } = req.body
+      return res.end(JSON.stringify(tasks))
+    }
+  },
+  {
+    method: 'PUT',
+    path: buildRoutePath('/tasks/:id'),
+    handler: (req, res) => {
+      const { id } = req.params
+      const { title, description } = req.body
 
-            database.update('tasks', id, {
-                title,
-                description,
-                completed_at,
-                create_at,
-                update_at,
-            })
+      if (!title || !description) {
+        return res.writeHead(400).end(
+          JSON.stringify({ message: 'title or description are required' })
+        )
+      }
 
-            // console.log(req.params)
+      const [task] = database.select('tasks', { id })
 
-            return res.writeHead(204).end()       
-        }
-    },    
-    {
-        method: 'DELETE',
-        path: buildRoutePath('/tasks/:id'),
-        handler: (req, res) => {
-            const { id } = req.params
+      if (!task) {
+        return res.writeHead(404).end()
+      }
 
-            database.delete('tasks', id)
+      database.update('tasks', id, {
+        title,
+        description,
+        updated_at: new Date()
+      })
 
-            return res.writeHead(204).end()       
-        }
-    },
-    
+      return res.writeHead(204).end()
+    }
+  },
+  {
+    method: 'DELETE',
+    path: buildRoutePath('/tasks/:id'),
+    handler: (req, res) => {
+      const { id } = req.params
+
+      const [task] = database.select('tasks', { id })
+
+      if (!task) {
+        return res.writeHead(404).end()
+      }
+
+      database.delete('tasks', id)
+
+      return res.writeHead(204).end()
+    }
+  },
+  {
+    method: 'PATCH',
+    path: buildRoutePath('/tasks/:id/complete'),
+    handler: (req, res) => {
+      const { id } = req.params
+
+      const [task] = database.select('tasks', { id })
+
+      if (!task) {
+        return res.writeHead(404).end()
+      }
+
+      const isTaskCompleted = !!task.completed_at
+      const completed_at = isTaskCompleted ? null : new Date()
+
+      database.update('tasks', id, { completed_at })
+
+      return res.writeHead(204).end()
+    }
+  }
 ]

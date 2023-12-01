@@ -1,0 +1,24 @@
+{
+  "tasks": [
+    {
+      "id": "f74b8e94-50ce-4826-9d48-c7e1ccbe8d64",
+      "title": "Codificação 0007",
+      "description": "Codificação 0001 Configurar ambiente de desenvolvimento e testes",
+      "updated_at": "2023-12-01T19:52:20.051Z"
+    },
+    {
+      "id": "42efb6e5-9aab-45b1-8860-173fd7426e9c",
+      "title": "Codificação 0007",
+      "description": "Codificação 0001 Configurar ambiente de desenvolvimento e testes",
+      "updated_at": "2023-12-01T19:53:12.294Z"
+    },
+    {
+      "id": "35561e8d-a7ff-4666-856b-0682611238cf",
+      "title": "Teste 0002",
+      "description": "Implementar o código-fonte do sistema, utilizando uma linguagem de programação adequada e seguindo as boas práticas de codificação.",
+      "completed_at": null,
+      "created_at": "2023-12-01T20:01:28.879Z",
+      "updated_at": "2023-12-01T20:01:28.879Z"
+    }
+  ]
+}
